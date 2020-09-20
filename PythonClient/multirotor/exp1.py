@@ -1,12 +1,11 @@
 
-
+# 2-input XOR inputs and expected outputs.
+# In settings.json first activate computer vision mode: 
+# https://github.com/Microsoft/AirSim/blob/master/docs/image_apis.md#computer-vision-mode
 from __future__ import print_function
 import os
 import neat
 import visualize
-# 2-input XOR inputs and expected outputs.
-# In settings.json first activate computer vision mode: 
-# https://github.com/Microsoft/AirSim/blob/master/docs/image_apis.md#computer-vision-mode
 import setup_path 
 import airsim
 import numpy as np
@@ -17,6 +16,8 @@ import multiprocessing
 import os
 import pickle
 import neat
+
+#initialise scene camera 
 def printUsage():
    print("Usage: python camera.py [depth|segmentation|scene]")
 cameraType = "scene"
@@ -34,26 +35,28 @@ if (not cameraType in cameraTypeMap):
   printUsage()
   sys.exit(0)
 print (cameraTypeMap[cameraType])
+#cinnecting simulator
 client = airsim.MultirotorClient()
 client.confirmConnection()
 client.enableApiControl(True)
 client.armDisarm(True)
 client.takeoffAsync().join()
 car_cascade = cv2.CascadeClassifier( r'C:\Users\kartikeya singh\Desktop\my_cas\classifier\cascade.xml')
-
+#evolution function
 def eval_genomes(genomes, config):
-    
+    #initialising population using which network of population will be made
     kar=10
     karr=40
-
+      #looping through NEAT package
     for genome_id, genome in genomes:
-        
      #   x = [kar,-karr]
         x=[14]
         kar= kar+10
         karr= karr+12
+      #initialising fitness
         genome.fitness = 0
         net = neat.nn.FeedForwardNetwork.create(genome, config)
+      #activating neat
         output = net.activate(x)
       #  print(output)
         yo=0
@@ -83,7 +86,7 @@ def eval_genomes(genomes, config):
                 png = cv2.imdecode(airsim.string_to_uint8_array(rawImage), cv2.IMREAD_UNCHANGED)
                 gray = cv2.cvtColor(png, cv2.COLOR_BGR2GRAY)
                 cars = car_cascade.detectMultiScale(gray, 1.01, 1)
-                
+                #using our cascade to get the inputs
                 for (x, y, w, h) in cars:           
                     cv2.rectangle(png, (x,y), (x+w,y+h), (255,0,0), 2)
                     cv2.rectangle(png, (2, 2) , (316, 177) , (0,255,0),2) 
